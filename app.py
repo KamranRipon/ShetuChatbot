@@ -4,6 +4,7 @@ from flask import Flask, render_template, request, jsonify
 from transformers import AutoModelForCausalLM, AutoTokenizer 
 import torch
 import emotions
+from flask_cors import CORS  # Import CORS
 #from flask_sqlalchemy import SQLAlchemy
 #from auth import auth_blueprint
 
@@ -13,6 +14,7 @@ tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-medium")
 model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-medium")
 
 app = Flask (__name__)
+CORS(app, origins=["http://localhost:5173"])  # Allow only specific origins
 # app.config['SECRET_KEY'] = 'your_secret_key'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 
@@ -26,7 +28,6 @@ def add_security_headers(response):
     # Add the X-Content-Type-Options header
     response.headers['X-Content-Type-Options'] = 'nosniff'
     return response
-
 @app.route("/")
 def index():
     return render_template('chat.html')
@@ -39,6 +40,7 @@ def chat():
     print(f"Received message from client: {msg}")  # Debugging: log the message from the user
 
     response = get_Chat_response(msg)
+    # response = emotions.get_response(msg)
     print(f"Bot response: {response}")  # Debugging: log the bot's response
     return jsonify(response)  # Make sure to return JSON or a simple string
     #return response
@@ -64,4 +66,4 @@ def get_Chat_response(text):
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=5000)
