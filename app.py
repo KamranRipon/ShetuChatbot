@@ -14,7 +14,7 @@ tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-medium")
 model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-medium")
 
 app = Flask (__name__)
-CORS(app, origins=["http://localhost:5173"])  # Allow only specific origins
+CORS(app, origins=["https://emotion-analysing-app.netlify.app/"])  # Allow only specific origins
 # app.config['SECRET_KEY'] = 'your_secret_key'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 
