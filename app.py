@@ -7,6 +7,7 @@ import emotions
 from flask_cors import CORS  # Import CORS
 #from flask_sqlalchemy import SQLAlchemy
 #from auth import auth_blueprint
+import os  # Add this import
 
 
 
@@ -64,6 +65,7 @@ def get_Chat_response(text):
     
 
 
-
-if __name__ == '__main__':
-    app.run()
+# Run the app
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))  # Use Render's PORT or default to 5000
+    app.run(host="0.0.0.0", port=port)  # Bind to 0.0.0.0 and the specified port
