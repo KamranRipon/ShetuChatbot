@@ -46,7 +46,7 @@ def chat():
     return jsonify(response)  # Make sure to return JSON or a simple string
     #return response
 
-
+chat_history_ids = None  # Initialize
 def get_Chat_response(text):
 
 # Let's chat for 5 lines
