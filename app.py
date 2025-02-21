@@ -1,29 +1,18 @@
 from flask_login import LoginManager
-import transformers
+# import transformers
 from flask import Flask, render_template, request, jsonify
 from transformers import AutoModelForCausalLM, AutoTokenizer 
 import torch
 import emotions
 from flask_cors import CORS  # Import CORS
-#from flask_sqlalchemy import SQLAlchemy
-#from auth import auth_blueprint
 import os  # Add this import
-
-
 
 tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-medium")
 model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-medium")
 
 app = Flask (__name__)
-CORS(app, origins=["https://emotion-analysing-app.netlify.app/"])  # Allow only specific origins
-# app.config['SECRET_KEY'] = 'your_secret_key'
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+CORS(app, origins=["http://localhost:5173"])  # Allow only specific origins
 
-# db = SQLAlchemy(app)
-# login_user = LoginManager(app)
-# login_user.login_view = 'auth.login'
-# # Register the blueprint
-# app.register_blueprint(auth_blueprint)
 @app.after_request
 def add_security_headers(response):
     # Add the X-Content-Type-Options header
@@ -33,18 +22,26 @@ def add_security_headers(response):
 def index():
     return render_template('chat.html')
 
-@app.route("/get", methods=["GET", "POST"]) ##methods=["GET", "POST"]
+@app.route("/get", methods=["POST"])
 def chat():
-    msg = request.form['msg']
-    # input = msg
-    # return get_Chat_response(input)
-    print(f"Received message from client: {msg}")  # Debugging: log the message from the user
+    try:
+        # Extract the message from the JSON request body
+        data = request.get_json()
+        msg = data.get('message')  # Use 'message' as the key
+        if not msg:
+            return jsonify({"error": "No message provided"}), 400
 
-    response = get_Chat_response(msg)
-    # response = emotions.get_response(msg)
-    print(f"Bot response: {response}")  # Debugging: log the bot's response
-    return jsonify(response)  # Make sure to return JSON or a simple string
-    #return response
+        print(f"Received message from client: {msg}")  # Debugging: log the message from the user
+
+        # Call the chatbot function
+        response = emotions.get_chatbot_response(msg)
+        print(f"Bot response: {response}")  # Debugging: log the bot's response
+
+        # Return the response as JSON
+        return jsonify({"response": response})
+    except Exception as e:
+        print(f"Error in /get route: {e}")
+        return jsonify({"error": "Internal server error"}), 500
 
 chat_history_ids = None  # Initialize
 def get_Chat_response(text):
@@ -63,8 +60,6 @@ def get_Chat_response(text):
         # pretty print last ouput tokens from bot
         return (tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:][0], skip_special_tokens=True))
     
-
-
 # Run the app
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))  # Use Render's PORT or default to 5000
